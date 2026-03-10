@@ -14,10 +14,16 @@ langgraph-cli[inmem]
 langchain-groq
 python-dotenv
 langchain-mcp-adapters
-lanchain
+langchain
 ipywidgets
 sounddevice
 scipy
 pypdf
 langchain-huggingface
 pandas
+langchain-ollama
+chromadb
+ollama
+langsmith
+arxiv
+pymupdf
