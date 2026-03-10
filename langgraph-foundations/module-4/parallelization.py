@@ -1,6 +1,5 @@
 import os
 import operator
-import httpx
 from typing import Annotated
 from typing_extensions import TypedDict
 from dotenv import load_dotenv
@@ -18,12 +17,6 @@ load_dotenv(
     override=True,
 )
 
-CA_BUNDLE = "/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/langchain-academy/ca-bundle.pem"
-os.environ["SSL_CERT_FILE"] = CA_BUNDLE
-os.environ["REQUESTS_CA_BUNDLE"] = CA_BUNDLE
-
-http_client = httpx.Client(verify=CA_BUNDLE)
-os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
 os.environ["TAVILY_API_KEY"] = os.getenv("TAVILY_API_KEY")
 
 # ── LLM ────────────────────────────────────────────────────────────────────────
@@ -50,7 +43,6 @@ def search_web(state):
     )
     return {"context": [formatted_search_docs]}
 
-
 def search_wikipedia(state):
     """Retrieve docs from wikipedia"""
     print("Searching Wikipedia...")
@@ -65,7 +57,6 @@ def search_wikipedia(state):
         ]
     )
     return {"context": [formatted_search_docs]}
-
 
 def generate_answer(state):
     """Node to answer a question"""

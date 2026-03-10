@@ -4,9 +4,6 @@ from typing import List, Optional, Annotated
 from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 
-os.environ["SSL_CERT_FILE"] = "/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/langchain-academy/ca-bundle.pem"
-os.environ["REQUESTS_CA_BUNDLE"] = "/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/langchain-academy/ca-bundle.pem"
-
 os.environ["LANGSMITH_TRACING"] = "true"
 os.environ["LANGSMITH_PROJECT"] = "langchain-academy"
 
@@ -19,7 +16,6 @@ class Log(TypedDict):
     grade: Optional[int]
     grader: Optional[str]
     feedback: Optional[str]
-
 
 # --- Failure Analysis Sub-graph ---
 
@@ -52,7 +48,6 @@ fa_builder.add_edge(START, "get_failures")
 fa_builder.add_edge("get_failures", "generate_summary")
 fa_builder.add_edge("generate_summary", END)
 
-
 # --- Question Summarization Sub-graph ---
 
 class QuestionSummarizationState(TypedDict):
@@ -82,7 +77,6 @@ qs_builder.add_edge(START, "generate_summary")
 qs_builder.add_edge("generate_summary", "send_to_slack")
 qs_builder.add_edge("send_to_slack", END)
 
-
 # --- Entry Graph ---
 
 class EntryGraphState(TypedDict):
@@ -109,7 +103,6 @@ entry_builder.add_edge("failure_analysis", END)
 entry_builder.add_edge("question_summarization", END)
 
 graph = entry_builder.compile()
-
 
 if __name__ == "__main__":
     # Dummy logs

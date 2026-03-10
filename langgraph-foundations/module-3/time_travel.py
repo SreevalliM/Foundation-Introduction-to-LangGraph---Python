@@ -8,7 +8,6 @@ Demonstrates three key capabilities:
 """
 
 import os
-import httpx
 from dotenv import load_dotenv
 
 from langchain_groq import ChatGroq
@@ -26,13 +25,6 @@ load_dotenv(
     override=True,
 )
 
-CA_BUNDLE = "/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/langchain-academy/ca-bundle.pem"
-os.environ["SSL_CERT_FILE"] = CA_BUNDLE
-os.environ["REQUESTS_CA_BUNDLE"] = CA_BUNDLE
-
-http_client = httpx.Client(verify=CA_BUNDLE)
-os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
-
 # ──────────────────────────────────────────────
 # Tool definitions
 # ──────────────────────────────────────────────
@@ -46,7 +38,6 @@ def multiply(a: int, b: int) -> int:
     """
     return a * b
 
-
 def add(a: int, b: int) -> int:
     """Adds a and b.
 
@@ -55,7 +46,6 @@ def add(a: int, b: int) -> int:
         b: second int
     """
     return a + b
-
 
 def divide(a: int, b: int) -> float:
     """Divide a by b.
@@ -66,14 +56,13 @@ def divide(a: int, b: int) -> float:
     """
     return a / b
 
-
 tools = [add, multiply, divide]
 
 # ──────────────────────────────────────────────
 # LLM setup
 # ──────────────────────────────────────────────
 
-llm = ChatGroq(model="llama-3.3-70b-versatile", http_client=http_client)
+llm = ChatGroq(model="llama-3.3-70b-versatile")
 llm_with_tools = llm.bind_tools(tools)
 
 # System message
@@ -81,14 +70,12 @@ sys_msg = SystemMessage(
     content="You are a helpful assistant tasked with performing arithmetic on a set of inputs."
 )
 
-
 # ──────────────────────────────────────────────
 # Graph construction
 # ──────────────────────────────────────────────
 
 def assistant(state: MessagesState):
     return {"messages": [llm_with_tools.invoke([sys_msg] + state["messages"])]}
-
 
 builder = StateGraph(MessagesState)
 
@@ -107,7 +94,6 @@ builder.add_edge("tools", "assistant")
 # Compile with an in-memory checkpointer (enables time travel)
 graph = builder.compile(checkpointer=MemorySaver())
 
-
 # ──────────────────────────────────────────────
 # Helper
 # ──────────────────────────────────────────────
@@ -116,7 +102,6 @@ def print_separator(title: str):
     print(f"\n{'=' * 60}")
     print(f"  {title}")
     print(f"{'=' * 60}\n")
-
 
 # ──────────────────────────────────────────────
 # 1. Run the agent

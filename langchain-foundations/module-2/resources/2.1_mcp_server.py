@@ -1,22 +1,16 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv("/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/Foundation-Introduction-to-LangGraph---Python/.env", override=True)
-
-CA_BUNDLE = "/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/Foundation-Introduction-to-LangGraph---Python/ca-bundle.pem"
-os.environ["SSL_CERT_FILE"] = CA_BUNDLE
-os.environ["REQUESTS_CA_BUNDLE"] = CA_BUNDLE
+load_dotenv()
 
 from mcp.server.fastmcp import FastMCP
 from tavily import TavilyClient
 from typing import Dict, Any
 from requests import get
 
-
 mcp = FastMCP("mcp_server")
 
 tavily_client = TavilyClient()
-
 
 # Tool for searching the web
 @mcp.tool()
@@ -27,7 +21,6 @@ def search_web(query: str) -> Dict[str, Any]:
 
     return results
 
-
 # Resources - provide access to langchain-ai repo files
 @mcp.resource("github://langchain-ai/langchain-mcp-adapters/blob/main/README.md")
 def github_file():
@@ -37,11 +30,10 @@ def github_file():
     """
     url = f"https://raw.githubusercontent.com/langchain-ai/langchain-mcp-adapters/blob/main/README.md"
     try:
-        resp = get(url, verify=CA_BUNDLE)
+        resp = get(url)
         return resp.text
     except Exception as e:
         return f"Error: {str(e)}"
-
 
 # Prompt template
 @mcp.prompt()

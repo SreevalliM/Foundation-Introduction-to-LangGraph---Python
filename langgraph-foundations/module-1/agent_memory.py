@@ -1,5 +1,5 @@
 
-import os, httpx
+import os
 from typing import List
 
 from langchain_groq import ChatGroq
@@ -11,28 +11,19 @@ from langgraph.checkpoint.memory import MemorySaver
 from dotenv import load_dotenv
 
 # Environment setup
-load_dotenv("/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/langchain-academy/.env", override=True)
-
-CA_BUNDLE = "/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/langchain-academy/ca-bundle.pem"
-os.environ["SSL_CERT_FILE"] = CA_BUNDLE
-os.environ["REQUESTS_CA_BUNDLE"] = CA_BUNDLE
-http_client = httpx.Client(verify=CA_BUNDLE)
-
+load_dotenv()
 
 def multiply(a: int, b: int) -> int:
     """Multiply a and b."""
     return a * b
 
-
 def add(a: int, b: int) -> int:
     """Add a and b."""
     return a + b
 
-
 def divide(a: int, b: int) -> float:
     """Divide a and b."""
     return a / b
-
 
 def build_graph(llm_with_tools):
     # System message
@@ -50,7 +41,6 @@ def build_graph(llm_with_tools):
     builder.add_edge("tools", "assistant")
     return builder
 
-
 def run_without_memory(graph):
     print("\n=== No Memory Example ===")
     messages: List[BaseMessage] = [HumanMessage(content="Add 3 and 4.")]
@@ -62,7 +52,6 @@ def run_without_memory(graph):
     result = graph.invoke({"messages": messages})
     for m in result["messages"]:
         print(m)
-
 
 def run_with_memory(builder):
     print("\n=== With Memory Example ===")
@@ -81,12 +70,10 @@ def run_with_memory(builder):
     for m in result["messages"]:
         print(m)
 
-
 def main():
     
-
     tools = [add, multiply, divide]
-    llm = ChatGroq(model="qwen/qwen3-32b", http_client=http_client)
+    llm = ChatGroq(model="qwen/qwen3-32b")
     llm_with_tools = llm.bind_tools(tools)
 
     builder = build_graph(llm_with_tools)
@@ -94,7 +81,6 @@ def main():
 
     run_without_memory(graph)
     run_with_memory(builder)
-
 
 if __name__ == "__main__":
     main()

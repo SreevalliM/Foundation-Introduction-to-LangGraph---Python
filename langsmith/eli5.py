@@ -1,19 +1,14 @@
-import os, httpx
+import os
 from groq import Groq
 from langsmith import traceable
 from dotenv import load_dotenv
 from langchain_community.tools.tavily_search import TavilySearchResults
 
-
 # Load environment variables
-load_dotenv(dotenv_path="/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/Foundation-Introduction-to-LangGraph---Python/.env", override=True)
+load_dotenv()
 
-CA_BUNDLE = "/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/Foundation-Introduction-to-LangGraph---Python/ca-bundle.pem"
-os.environ["SSL_CERT_FILE"] = CA_BUNDLE
-os.environ["REQUESTS_CA_BUNDLE"] = CA_BUNDLE
 os.environ["LANGSMITH_TRACING"] = "true"
 os.environ["LANGSMITH_ENDPOINT"] = "https://api.smith.langchain.com"
-
 
 # Initialize web search tool
 web_search_tool = TavilySearchResults(max_results=1)
@@ -29,7 +24,6 @@ Context: {context}
 
 Answer:"""
 # print("Prompt Template: ", prompt)
-
 
 # Create Application
 groq_client = Groq(api_key=os.environ["GROQ_API_KEY"])

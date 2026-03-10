@@ -1,6 +1,5 @@
 import os
 import operator
-import httpx
 from dotenv import load_dotenv
 from typing import Annotated
 from typing_extensions import TypedDict
@@ -10,15 +9,7 @@ from langgraph.types import Send
 from langgraph.graph import END, StateGraph, START
 
 # Load .env using absolute path (override=True to ensure it always loads fresh)
-load_dotenv("/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/langchain-academy/.env", override=True)
-
-CA_BUNDLE = "/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/langchain-academy/ca-bundle.pem"
-os.environ["SSL_CERT_FILE"] = CA_BUNDLE
-os.environ["REQUESTS_CA_BUNDLE"] = CA_BUNDLE
-
-# Create a custom httpx client with the CA bundle
-http_client = httpx.Client(verify=CA_BUNDLE)
-os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
+load_dotenv()
 
 # LangSmith tracing
 os.environ["LANGSMITH_TRACING"] = "true"
@@ -30,7 +21,7 @@ joke_prompt = """Generate a joke about {subject}"""
 best_joke_prompt = """Below are a bunch of jokes about {topic}. Select the best one! Return the ID of the best one, starting 0 as the ID for the first joke. Jokes: \n\n  {jokes}"""
 
 # LLM
-model = ChatGroq(model="qwen/qwen3-32b", temperature=0, http_client=http_client)
+model = ChatGroq(model="qwen/qwen3-32b", temperature=0)
 
 # --- Schema ---
 

@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from typing import Annotated, List
 from typing_extensions import TypedDict
 
-import os, httpx
+import os
 from dotenv import load_dotenv
 
 from langchain_community.document_loaders import WikipediaLoader
@@ -20,20 +20,14 @@ from langgraph.graph import END, MessagesState, START, StateGraph
 # Load .env from project root (two levels up from studio/)
 env_path = os.path.join(os.path.dirname(__file__), "..", "..", ".env")
 load_dotenv(env_path, override=True)
-
-CA_BUNDLE = os.path.join(os.path.dirname(__file__), "..", "..", "ca-bundle.pem")
-os.environ["SSL_CERT_FILE"] = CA_BUNDLE
-os.environ["REQUESTS_CA_BUNDLE"] = CA_BUNDLE
-http_client = httpx.Client(verify=CA_BUNDLE)
-
 ### LLM — 3-tier Groq strategy to stay within free-tier TPM limits
 # Each model has its own independent TPM counter (~6K each), so spreading calls avoids 429s
 
 # Medium: structured output (analyst creation, search queries for web), question generation, intro
-llm_medium = ChatGroq(model="qwen/qwen3-32b", temperature=0, http_client=http_client)
+llm_medium = ChatGroq(model="qwen/qwen3-32b", temperature=0)
 
 # Heavy: large-context tasks (answer generation, section/report writing, conclusion, wiki search queries)
-llm_heavy = ChatGroq(model="llama-3.3-70b-versatile", temperature=0, http_client=http_client)
+llm_heavy = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
 
 ### Retry helper for Groq free-tier rate limits
 def _invoke_with_retry(llm_call, max_retries=3, base_wait=2.0):

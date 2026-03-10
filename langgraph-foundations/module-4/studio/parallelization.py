@@ -1,4 +1,4 @@
-import os, httpx
+import os
 import operator
 from typing import Annotated
 from typing_extensions import TypedDict
@@ -17,14 +17,8 @@ from langgraph.graph import StateGraph, START, END
 ### Environment setup
 env_path = os.path.join(os.path.dirname(__file__), "..", "..", ".env")
 load_dotenv(env_path, override=True)
-
-CA_BUNDLE = os.path.join(os.path.dirname(__file__), "..", "..", "ca-bundle.pem")
-os.environ["SSL_CERT_FILE"] = CA_BUNDLE
-os.environ["REQUESTS_CA_BUNDLE"] = CA_BUNDLE
-http_client = httpx.Client(verify=CA_BUNDLE)
-
 # Use llm_heavy for answer generation (only LLM call in this graph)
-llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0, http_client=http_client)
+llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
 
 class State(TypedDict):
     question: str

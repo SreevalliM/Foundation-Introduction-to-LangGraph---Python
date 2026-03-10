@@ -1,4 +1,4 @@
-import os, httpx
+import os
 from dotenv import load_dotenv
 from typing import List
 from typing_extensions import TypedDict
@@ -8,18 +8,10 @@ from langgraph.graph import StateGraph, START, END
 from langchain_groq import ChatGroq
 from langchain_community.tools.tavily_search import TavilySearchResults
 
-
 # Load environment variables
-load_dotenv(dotenv_path="/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/Foundation-Introduction-to-LangGraph---Python/.env", override=True)
+load_dotenv()
 
-CA_BUNDLE = "/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/Foundation-Introduction-to-LangGraph---Python/ca-bundle.pem"
-os.environ["SSL_CERT_FILE"] = CA_BUNDLE
-os.environ["REQUESTS_CA_BUNDLE"] = CA_BUNDLE
-
-http_client = httpx.Client(verify=CA_BUNDLE)
-http_async_client = httpx.AsyncClient(verify=CA_BUNDLE)
-
-llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0, http_client=http_client, http_async_client=http_async_client)
+llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
 
 # Initialize web search tool
 web_search_tool = TavilySearchResults(max_results=1)
@@ -32,7 +24,6 @@ class GraphState(TypedDict):
     documents: List[str]
     messages: List[str]
 
-
 # Define prompt template
 prompt = """You are a professor and expert in explaining complex topics in a way that is easy to understand. 
 Your job is to answer the provided question so that even a 5 year old can understand it. 
@@ -44,7 +35,6 @@ Context: {context}
 
 Answer:"""
 # print("Prompt Template: ", prompt)
-
 
 # ------------------------------------------------------------
 # Use LangGraph to create ELI5 Application
@@ -71,7 +61,6 @@ def search(state):
 
     return {"documents": documents, "question": question}
 
-    
 def explain(state: GraphState):
     """
     Generate response
@@ -85,7 +74,6 @@ def explain(state: GraphState):
     formatted = prompt.format(question=question, context="\n".join([d.page_content for d in documents]))
     generation = llm.invoke([HumanMessage(content=formatted)])
     return {"question": question, "messages": [generation]}
-
 
 graph = StateGraph(GraphState, input_schema=InputState)
 graph.add_node("explain", explain)

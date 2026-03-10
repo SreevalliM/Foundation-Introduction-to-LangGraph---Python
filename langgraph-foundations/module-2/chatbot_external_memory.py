@@ -3,7 +3,6 @@ import sys
 import sqlite3
 import getpass
 import argparse
-import httpx
 from pathlib import Path
 from typing import List
 from dotenv import load_dotenv
@@ -13,15 +12,10 @@ from langchain_core.messages import SystemMessage, HumanMessage, RemoveMessage
 from langgraph.graph import MessagesState, StateGraph, START, END
 from langgraph.checkpoint.sqlite import SqliteSaver
 
-load_dotenv("/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/langchain-academy/.env", override=True)
-
-CA_BUNDLE = "/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/langchain-academy/ca-bundle.pem"
-os.environ["SSL_CERT_FILE"] = CA_BUNDLE
-os.environ["REQUESTS_CA_BUNDLE"] = CA_BUNDLE
-http_client = httpx.Client(verify=CA_BUNDLE)
+load_dotenv()
 
 # Single model initialization (removed duplicate)
-model = ChatGroq(model="qwen/qwen3-32b", http_client=http_client)
+model = ChatGroq(model="qwen/qwen3-32b")
 
 class State(MessagesState):
     summary: str
@@ -33,7 +27,6 @@ def _dbg(msg: str):
     if DEBUG:
         print(f"[DEBUG] {msg}")
 
-
 def call_model(state: State):
     summary = state.get("summary", "")
     if summary:
@@ -44,7 +37,6 @@ def call_model(state: State):
     _dbg(f"Calling model with {len(messages)} messages (summary present={bool(summary)})")
     response = model.invoke(messages)
     return {"messages": response}
-
 
 def summarize_conversation(state: State):
     summary = state.get("summary", "")
@@ -61,13 +53,11 @@ def summarize_conversation(state: State):
     delete_messages = [RemoveMessage(id=m.id) for m in state["messages"][:-2]]
     return {"summary": response.content, "messages": delete_messages}
 
-
 def should_continue(state: State):
     # After more than 6 messages, trigger summarization
     decision = "summarize_conversation" if len(state["messages"]) > 6 else END
     _dbg(f"should_continue -> {decision}")
     return decision
-
 
 def build_graph(db_path: str | Path):
     db_path = Path(db_path)
@@ -83,7 +73,6 @@ def build_graph(db_path: str | Path):
     workflow.add_edge("summarize_conversation", END)
     return workflow.compile(checkpointer=memory)
 
-
 def _print_messages(msgs):
     # Print only the latest AI message (or all if debug)
     to_print = msgs if DEBUG else msgs[-1:]
@@ -94,7 +83,6 @@ def _print_messages(msgs):
             role = getattr(m, 'type', 'message')
             print(f"[{role}] {getattr(m, 'content', m)}")
 
-
 def show_state(graph, thread_id: str):
     config = {"configurable": {"thread_id": thread_id}}
     st = graph.get_state(config)
@@ -102,7 +90,6 @@ def show_state(graph, thread_id: str):
     if st.values.get("summary"):
         print("\nCurrent Summary:\n", st.values["summary"])
     print("\nMessage Count:", len(st.values.get("messages", [])))
-
 
 def run_demo(graph, thread_id: str):
     turns: List[str] = [
@@ -119,7 +106,6 @@ def run_demo(graph, thread_id: str):
         output = graph.invoke({"messages": [HumanMessage(content=t)]}, config)
         _print_messages(output["messages"])
     show_state(graph, thread_id)
-
 
 def run_interactive(graph, thread_id: str):
     print("Interactive chat. Type /exit to quit, /state to inspect state.")
@@ -139,7 +125,6 @@ def run_interactive(graph, thread_id: str):
         output = graph.invoke({"messages": [HumanMessage(content=user)]}, config)
         _print_messages(output["messages"])
 
-
 def parse_args():
     p = argparse.ArgumentParser(description="Chatbot with external memory and summarization")
     p.add_argument("--db", default="module-2/state_db/example.db", help="Path to sqlite database file (will be created if missing)")
@@ -149,7 +134,6 @@ def parse_args():
     group.add_argument("--interactive", action="store_true", help="Run interactive chat loop")
     p.add_argument("--show-state", action="store_true", help="Show state then exit (can combine with --demo/--interactive after)")
     return p.parse_args()
-
 
 def main():
     args = parse_args()
@@ -173,7 +157,6 @@ def main():
                 return
         # Default to demo
         run_demo(graph, args.thread)
-
 
 if __name__ == "__main__":
     main()

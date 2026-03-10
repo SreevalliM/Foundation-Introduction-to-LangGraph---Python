@@ -1,5 +1,4 @@
 import os
-import httpx
 import getpass
 from typing import Literal
 from langchain_groq import ChatGroq
@@ -8,18 +7,12 @@ from langgraph.graph import MessagesState, StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 from dotenv import load_dotenv
 
-load_dotenv("/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/langchain-academy/.env", override=True)
-
-CA_BUNDLE = "/Users/L107127/Library/CloudStorage/OneDrive-EliLillyandCompany/Desktop/langchain-academy/ca-bundle.pem"
-os.environ["SSL_CERT_FILE"] = CA_BUNDLE
-os.environ["REQUESTS_CA_BUNDLE"] = CA_BUNDLE
-http_client = httpx.Client(verify=CA_BUNDLE)
+load_dotenv()
 
 class State(MessagesState):
     summary: str
 
-model = ChatGroq(model="qwen/qwen3-32b", http_client=http_client)
-
+model = ChatGroq(model="qwen/qwen3-32b")
 
 def call_model(state: State):
     print("Calling model with messages:")
@@ -35,7 +28,6 @@ def call_model(state: State):
     print("Model response:")
     print(f" - {response.content}")
     return {"messages": response}
-
 
 def summarize_conversation(state: State):
     print("Summarizing conversation...")
@@ -55,7 +47,6 @@ def summarize_conversation(state: State):
     print(f" - {response.content}")
     return {"summary": response.content, "messages": delete_messages}
 
-
 def should_continue(state: State):
     print("Checking if conversation should continue...")
     messages = state["messages"]
@@ -64,7 +55,6 @@ def should_continue(state: State):
         return "summarize_conversation"
     print("Conversation is short, continuing...")
     return END
-
 
 workflow = StateGraph(State)
 workflow.add_node("conversation", call_model)
@@ -76,7 +66,6 @@ workflow.add_edge("summarize_conversation", END)
 memory = MemorySaver()
 graph = workflow.compile(checkpointer=memory)
 
-
 def pretty_print_messages(msgs):
     print("Pretty printing messages:")
     for m in msgs:
@@ -85,7 +74,6 @@ def pretty_print_messages(msgs):
         except AttributeError:
             role = getattr(m, 'type', 'message')
             print(f"[{role}] {getattr(m, 'content', m)}")
-
 
 def run_demo():
     print("Starting demo thread...\n")
@@ -110,7 +98,6 @@ def run_demo():
 
     print("\nFinal State Keys:", list(graph.get_state(config).values.keys()))
     print("Summary Present:", bool(graph.get_state(config).values.get("summary")))
-
 
 if __name__ == "__main__":
     run_demo()
